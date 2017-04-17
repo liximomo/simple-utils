@@ -1,0 +1,45 @@
+{
+  "extends": "airbnb-base",
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+    "node": true,
+    "mocha": true,
+    "jquery": true
+  },
+  "settings" : {
+    "import/resolver": {
+      "webpack": {
+        "config": "webpack.config.prod.js"
+      }
+    }
+  },
+  "rules": {
+    // prettier conflict
+    "no-plusplus": 0,
+    "arrow-parens": 0,
+    "no-underscore-dangle": 0,
+    "no-bitwise": 0,
+    "global-require": 0,
+    "func-names": 0,
+    "new-cap": 0,
+    "comma-dangle": 0,
+    "no-shadow": 0,
+    "space-before-function-paren": 0,
+    "dot-notation": 1,
+    "no-console": 0,
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "none"
+      }
+    ],
+    "no-unused-expressions": [
+      "error",
+      {
+        "allowShortCircuit": true
+      }
+    ],
+    "camelcase": 0
+  }
+}
