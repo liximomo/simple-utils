@@ -1,15 +1,14 @@
 export function addDOMEvent(html_element, event_name, event_function, useCapture) {
   if (html_element.addEventListener) {
-    html_element.addEventListener(event_name, event_function, useCapture); //don't need the 'call' trick because in FF everything already works in the right way
+    html_element.addEventListener(event_name, event_function, useCapture);
     return;
   }
 
-  //Internet Explorer
-  html_element.attachEvent("on" + event_name, function() { event_function.call(html_element); });
+  // Internet Explorer
+  html_element.attachEvent(`on${event_name}`, _ => { event_function.call(html_element); });
 }
 
-export function on(elSelector, eventName, selector, handler, useCapture) {
-  const _useCapture = useCapture === undefined ? false : useCapture;
+export function on(elSelector, eventName, selector, handler, useCapture = false) {
   let elements = null;
   if (typeof elSelector === 'string') {
     elements = document.querySelectorAll(elSelector);
@@ -37,7 +36,7 @@ export function on(elSelector, eventName, selector, handler, useCapture) {
           break;
         }
       }
-    }, _useCapture);
+    }, useCapture);
   };
   Array.prototype.forEach.call(elements, addEventListener);
 }

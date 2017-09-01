@@ -2,7 +2,7 @@ export default function compose(...funcs) {
   const length = funcs ? funcs.length : 0;
   let index = length;
   while (index--) {
-    if (typeof funcs[index] !== 'function') {
+    if (typeof funcs[index] != 'function') {
       throw new TypeError('Expected a function');
     }
   }

@@ -3,16 +3,7 @@
   "parser": "babel-eslint",
   "env": {
     "browser": true,
-    "node": true,
-    "mocha": true,
-    "jquery": true
-  },
-  "settings" : {
-    "import/resolver": {
-      "webpack": {
-        "config": "webpack.config.prod.js"
-      }
-    }
+    "node": true
   },
   "rules": {
     // prettier conflict

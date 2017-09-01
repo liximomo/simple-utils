@@ -1,0 +1,28 @@
+{
+  "presets": [
+    "stage-2"
+  ],
+  "env": {
+    "commonjs": {
+      "presets": [
+        ["env", {
+          "modules": "commonjs"
+        }]
+      ]
+    },
+    "esm": {
+      "presets": [
+        ["env", {
+          "modules": false
+        }]
+      ]
+    },
+    "rollup": {
+      "presets": [
+        ["env", {
+          "modules": false
+        }]
+      ]
+    }
+  }
+}

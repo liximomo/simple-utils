@@ -1,16 +1,19 @@
 import params from './params';
 
-const headers = {
-  'Content-Type': 'application/x-www-form-urlencoded'
+const defaultHeaders = {
+  'Content-Type': 'application/x-www-form-urlencoded',
 };
 
 const defaultOption = {
-  headers,
   credentials: 'include',
   timeout: 1000 * 10,
 };
 
 function createUrlString(paramObject) {
+  if (!paramObject) {
+    return '';
+  }
+
   const urlString = params(paramObject);
   if (!urlString) {
     return '';
@@ -18,11 +21,26 @@ function createUrlString(paramObject) {
   return `?${urlString}`;
 }
 
-function createContext({ base }) {
+function createContext({ base = '', headers = {}, beforeFetch }) {
   function fetchProxy(url, option) {
-    const fullOption = { ...defaultOption, ...option };
-    const fullurl = ~url.indexOf('://') ? url : `${base}/${url}`;
-    return window.fetch(fullurl, fullOption);
+    let baseUrl = base;
+    const fullOption = {
+      headers: {
+        ...defaultHeaders,
+        ...(typeof headers === 'function' ? headers() : headers),
+      },
+      ...defaultOption,
+      ...option,
+    };
+    if (typeof fullOption.base !== 'undefined') {
+      baseUrl = fullOption.base;
+    }
+    const fullurl = url.indexOf('://') !== -1 ? url : `${baseUrl}/${url}`;
+    const request = new Request(fullurl, fullOption);
+    if (beforeFetch) {
+      beforeFetch(request);
+    }
+    return window.fetch(request);
   }
 
   function get(url, paramObject = {}, option) {
