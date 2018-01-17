@@ -1,4 +1,5 @@
 import params from './params';
+import timeoutPromise from './timeoutPromise';
 
 const defaultHeaders = {
   'Content-Type': 'application/x-www-form-urlencoded',
@@ -6,7 +7,6 @@ const defaultHeaders = {
 
 const defaultOption = {
   credentials: 'include',
-  timeout: 1000 * 10,
 };
 
 function createUrlString(paramObject) {
@@ -21,9 +21,14 @@ function createUrlString(paramObject) {
   return `?${urlString}`;
 }
 
-function createContext({ base = '', headers = {}, beforeFetch }) {
+function createContext(options = {}) {
+  const userOptions = {};
+  config(options);
+
   function fetchProxy(url, option) {
-    let baseUrl = base;
+    const { base = '', headers = {}, beforeFetch } = userOptions;
+    const baseUrl = base;
+
     const fullOption = {
       headers: {
         ...defaultHeaders,
@@ -32,15 +37,38 @@ function createContext({ base = '', headers = {}, beforeFetch }) {
       ...defaultOption,
       ...option,
     };
-    if (typeof fullOption.base !== 'undefined') {
-      baseUrl = fullOption.base;
+
+    let fullurl;
+    if (url.indexOf('://') !== -1) {
+      fullurl = url;
+    } else {
+      fullurl = `${baseUrl}/${url.replace(/^\/+/, '')}`;
     }
-    const fullurl = url.indexOf('://') !== -1 ? url : `${baseUrl}/${url}`;
+
     const request = new Request(fullurl, fullOption);
     if (beforeFetch) {
       beforeFetch(request);
     }
+
+    if (fullOption.timeout !== undefined) {
+      return timeoutPromise(window.fetch(request), fullOption.timeout);
+    }
+
     return window.fetch(request);
+  }
+
+  function config(options) {
+    const { base } = options;
+
+    Object.assign(
+      userOptions,
+      options,
+      base
+        ? {
+            base: base.replace(/\/+$/, ''),
+          }
+        : {}
+    );
   }
 
   function get(url, paramObject = {}, option) {
@@ -59,6 +87,7 @@ function createContext({ base = '', headers = {}, beforeFetch }) {
     q: fetchProxy,
     get,
     post,
+    config,
   };
 }
 

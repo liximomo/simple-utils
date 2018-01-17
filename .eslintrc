@@ -6,7 +6,7 @@
     "node": true
   },
   "rules": {
-    // prettier conflict
+    "indent": 0,
     "no-plusplus": 0,
     "arrow-parens": 0,
     "no-underscore-dangle": 0,

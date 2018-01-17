@@ -7,8 +7,6 @@ export default function debounce(func, wait, { leading = true, trailing = true }
     const elapsed = Number(new Date()) - lastExec;
 
     const exec = trail => () => {
-
-
       lastExec = trail ? -(wait + 1) : Number(new Date());
       func.apply(this, args);
       // timeout = null;
