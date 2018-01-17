@@ -1,14 +1,14 @@
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 import params from './params';
+import timeoutPromise from './timeoutPromise';
 
 var defaultHeaders = {
   'Content-Type': 'application/x-www-form-urlencoded'
 };
 
 var defaultOption = {
-  credentials: 'include',
-  timeout: 1000 * 10
+  credentials: 'include'
 };
 
 function createUrlString(paramObject) {
@@ -23,27 +23,51 @@ function createUrlString(paramObject) {
   return '?' + urlString;
 }
 
-function createContext(_ref) {
-  var _ref$base = _ref.base,
-      base = _ref$base === undefined ? '' : _ref$base,
-      _ref$headers = _ref.headers,
-      headers = _ref$headers === undefined ? {} : _ref$headers,
-      beforeFetch = _ref.beforeFetch;
+function createContext() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  var userOptions = {};
+  config(options);
 
   function fetchProxy(url, option) {
+    var _userOptions$base = userOptions.base,
+        base = _userOptions$base === undefined ? '' : _userOptions$base,
+        _userOptions$headers = userOptions.headers,
+        headers = _userOptions$headers === undefined ? {} : _userOptions$headers,
+        beforeFetch = userOptions.beforeFetch;
+
     var baseUrl = base;
+
     var fullOption = _extends({
       headers: _extends({}, defaultHeaders, typeof headers === 'function' ? headers() : headers)
     }, defaultOption, option);
-    if (typeof fullOption.base !== 'undefined') {
-      baseUrl = fullOption.base;
+
+    var fullurl = void 0;
+    if (url.indexOf('://') !== -1) {
+      fullurl = url;
+    } else {
+      fullurl = baseUrl + '/' + url.replace(/^\/+/, '');
     }
-    var fullurl = url.indexOf('://') !== -1 ? url : baseUrl + '/' + url;
+
     var request = new Request(fullurl, fullOption);
     if (beforeFetch) {
       beforeFetch(request);
     }
+
+    if (fullOption.timeout !== undefined) {
+      return timeoutPromise(window.fetch(request), fullOption.timeout);
+    }
+
     return window.fetch(request);
+  }
+
+  function config(options) {
+    var base = options.base;
+
+
+    Object.assign(userOptions, options, base ? {
+      base: base.replace(/\/+$/, '')
+    } : {});
   }
 
   function get(url) {
@@ -66,7 +90,8 @@ function createContext(_ref) {
   return {
     q: fetchProxy,
     get: get,
-    post: post
+    post: post,
+    config: config
   };
 }
 

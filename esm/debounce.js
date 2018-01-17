@@ -19,7 +19,6 @@ export default function debounce(func, wait) {
 
     var exec = function exec(trail) {
       return function () {
-
         lastExec = trail ? -(wait + 1) : Number(new Date());
         func.apply(_this, args);
         // timeout = null;
