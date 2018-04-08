@@ -23,8 +23,20 @@ function createUrlString(paramObject) {
 
 function createContext(options = {}) {
   const userOptions = {};
-  config(options);
 
+  function config(cfg) {
+    const { base } = cfg;
+    Object.assign(
+      userOptions,
+      cfg,
+      base
+        ? {
+            base: base.replace(/\/+$/, ''),
+          }
+        : {}
+    );
+  }
+ 
   function fetchProxy(url, option) {
     const { base = '', headers = {}, beforeFetch } = userOptions;
     const baseUrl = base;
@@ -57,20 +69,6 @@ function createContext(options = {}) {
     return window.fetch(request);
   }
 
-  function config(options) {
-    const { base } = options;
-
-    Object.assign(
-      userOptions,
-      options,
-      base
-        ? {
-            base: base.replace(/\/+$/, ''),
-          }
-        : {}
-    );
-  }
-
   function get(url, paramObject = {}, option) {
     return fetchProxy(`${url}${createUrlString(paramObject)}`, option);
   }
@@ -83,6 +81,8 @@ function createContext(options = {}) {
     return fetchProxy(`${url}${createUrlString(paramObject)}`, withMethod);
   }
 
+  config(options);
+  
   return {
     q: fetchProxy,
     get,
