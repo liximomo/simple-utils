@@ -36,7 +36,7 @@ function createContext(options = {}) {
         : {}
     );
   }
- 
+
   function fetchProxy(url, option) {
     const { base = '', headers = {}, beforeFetch } = userOptions;
     const baseUrl = base;
@@ -49,6 +49,10 @@ function createContext(options = {}) {
       ...defaultOption,
       ...option,
     };
+
+    if (option && typeof FormData !== 'undefined' && option.body instanceof FormData) {
+      delete fullOption.headers['Content-Type'];
+    }
 
     let fullurl;
     if (url.indexOf('://') !== -1) {
@@ -82,7 +86,7 @@ function createContext(options = {}) {
   }
 
   config(options);
-  
+
   return {
     q: fetchProxy,
     get,

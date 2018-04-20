@@ -11,8 +11,8 @@ function debounce(func, wait) {
       _ref$trailing = _ref.trailing,
       trailing = _ref$trailing === undefined ? true : _ref$trailing;
 
-  var lastExec = -(wait + 1);
-  var timeout = void 0;
+  var leadingExecuted = false;
+  var timeout = null;
 
   function wrapper() {
     var _this = this;
@@ -21,13 +21,13 @@ function debounce(func, wait) {
       args[_key] = arguments[_key];
     }
 
-    var elapsed = Number(new Date()) - lastExec;
-
-    var exec = function exec(trail) {
+    var exec = function exec(reset) {
       return function () {
-        lastExec = trail ? -(wait + 1) : Number(new Date());
         func.apply(_this, args);
-        // timeout = null;
+        if (reset) {
+          leadingExecuted = false;
+          timeout = null;
+        }
       };
     };
 
@@ -35,7 +35,8 @@ function debounce(func, wait) {
       clearTimeout(timeout);
     }
 
-    if (leading && elapsed > wait) {
+    if (leading && !leadingExecuted) {
+      leadingExecuted = true;
       exec(false)();
     } else if (trailing) {
       timeout = setTimeout(exec(true), wait);
@@ -123,7 +124,14 @@ function createContext() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
   var userOptions = {};
-  config(options);
+
+  function config(cfg) {
+    var base = cfg.base;
+
+    Object.assign(userOptions, cfg, base ? {
+      base: base.replace(/\/+$/, '')
+    } : {});
+  }
 
   function fetchProxy(url, option) {
     var _userOptions$base = userOptions.base,
@@ -137,6 +145,10 @@ function createContext() {
     var fullOption = _extends({
       headers: _extends({}, defaultHeaders, typeof headers === 'function' ? headers() : headers)
     }, defaultOption, option);
+
+    if (option && typeof FormData !== 'undefined' && option.body instanceof FormData) {
+      delete fullOption.headers['Content-Type'];
+    }
 
     var fullurl = void 0;
     if (url.indexOf('://') !== -1) {
@@ -157,15 +169,6 @@ function createContext() {
     return window.fetch(request);
   }
 
-  function config(options) {
-    var base = options.base;
-
-
-    Object.assign(userOptions, options, base ? {
-      base: base.replace(/\/+$/, '')
-    } : {});
-  }
-
   function get(url) {
     var paramObject = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     var option = arguments[2];
@@ -182,6 +185,8 @@ function createContext() {
     }, option);
     return fetchProxy('' + url + createUrlString(paramObject), withMethod);
   }
+
+  config(options);
 
   return {
     q: fetchProxy,

@@ -5,8 +5,8 @@ export default function debounce(func, wait) {
       _ref$trailing = _ref.trailing,
       trailing = _ref$trailing === undefined ? true : _ref$trailing;
 
-  var lastExec = -(wait + 1);
-  var timeout = void 0;
+  var leadingExecuted = false;
+  var timeout = null;
 
   function wrapper() {
     var _this = this;
@@ -15,13 +15,13 @@ export default function debounce(func, wait) {
       args[_key] = arguments[_key];
     }
 
-    var elapsed = Number(new Date()) - lastExec;
-
-    var exec = function exec(trail) {
+    var exec = function exec(reset) {
       return function () {
-        lastExec = trail ? -(wait + 1) : Number(new Date());
         func.apply(_this, args);
-        // timeout = null;
+        if (reset) {
+          leadingExecuted = false;
+          timeout = null;
+        }
       };
     };
 
@@ -29,7 +29,8 @@ export default function debounce(func, wait) {
       clearTimeout(timeout);
     }
 
-    if (leading && elapsed > wait) {
+    if (leading && !leadingExecuted) {
+      leadingExecuted = true;
       exec(false)();
     } else if (trailing) {
       timeout = setTimeout(exec(true), wait);

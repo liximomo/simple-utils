@@ -27,7 +27,14 @@ function createContext() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
   var userOptions = {};
-  config(options);
+
+  function config(cfg) {
+    var base = cfg.base;
+
+    Object.assign(userOptions, cfg, base ? {
+      base: base.replace(/\/+$/, '')
+    } : {});
+  }
 
   function fetchProxy(url, option) {
     var _userOptions$base = userOptions.base,
@@ -41,6 +48,10 @@ function createContext() {
     var fullOption = _extends({
       headers: _extends({}, defaultHeaders, typeof headers === 'function' ? headers() : headers)
     }, defaultOption, option);
+
+    if (option && typeof FormData !== 'undefined' && option.body instanceof FormData) {
+      delete fullOption.headers['Content-Type'];
+    }
 
     var fullurl = void 0;
     if (url.indexOf('://') !== -1) {
@@ -61,15 +72,6 @@ function createContext() {
     return window.fetch(request);
   }
 
-  function config(options) {
-    var base = options.base;
-
-
-    Object.assign(userOptions, options, base ? {
-      base: base.replace(/\/+$/, '')
-    } : {});
-  }
-
   function get(url) {
     var paramObject = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     var option = arguments[2];
@@ -86,6 +88,8 @@ function createContext() {
     }, option);
     return fetchProxy('' + url + createUrlString(paramObject), withMethod);
   }
+
+  config(options);
 
   return {
     q: fetchProxy,
